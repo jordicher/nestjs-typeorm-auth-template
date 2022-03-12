@@ -1,0 +1,22 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres'
+    container_name: 'template_postgres'
+    environment:
+      POSTGRES_DB: 'template'
+      POSTGRES_USER: 'templateUser'
+      POSTGRES_PASSWORD: 'templateUserPass'
+      ALLOW_IP_RANGE: '0.0.0.0/0'
+    ports:
+      - '5432:5432'
+  postgresTest:
+    image: 'postgres'
+    container_name: 'template_test_postgres'
+    environment:
+      POSTGRES_DB: 'templateTest'
+      POSTGRES_USER: 'templateTestUser'
+      POSTGRES_PASSWORD: 'templateTestPass'
+      ALLOW_IP_RANGE: '0.0.0.0/0'
+    ports:
+      - '5433:5432'
