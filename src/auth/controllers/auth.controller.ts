@@ -1,7 +1,7 @@
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../users/entities/user.entity';
-import { AuthService } from './auth.service';
+import { User } from '../../users/entities/user.entity';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 export class AuthController {
