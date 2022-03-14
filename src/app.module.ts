@@ -5,6 +5,7 @@ import * as Joi from 'joi';
 import config from './config';
 import { enviroments } from './environments';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { UsersModule } from './users/users.module';
       },
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

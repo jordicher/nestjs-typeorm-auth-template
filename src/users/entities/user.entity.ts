@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/auth/models/roles.model';
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import { DefaultEntity } from '../../utils/entities/default.entity';
 
@@ -19,6 +20,13 @@ export class User extends DefaultEntity {
     name: 'last_name',
   })
   lastName: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.CUSTOMER,
+  })
+  role: Role;
 
   @BeforeInsert()
   async hashPassword() {
