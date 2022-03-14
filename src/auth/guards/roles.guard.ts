@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { ROLE_KEY } from '../decorators/roles.decorator';
 import { Role } from '../models/roles.model';
 import { PayloadToken } from '../models/token.model';
 
@@ -16,7 +16,7 @@ export class RolesGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const roles = this.reflector.get<Role[]>(ROLES_KEY, context.getHandler());
+    const roles = this.reflector.get<Role[]>(ROLE_KEY, context.getHandler());
 
     if (!roles) {
       return true;

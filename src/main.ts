@@ -1,14 +1,15 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const enableCors = configService.get<boolean>('enableCors');
-  const port = configService.get<number>('port');
+  const enableCors = configService.get<boolean>('ENABLE_CORS');
+  const port = configService.get<number>('PORT');
 
   if (enableCors) {
     app.enableCors();
@@ -25,6 +26,15 @@ async function bootstrap() {
     }),
   );
 
+  const config = new DocumentBuilder() //SWAGGER
+    .setTitle('API')
+    .setDescription('API description')
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document); //localhost:3000/docs | localhost:8080/docs to get info of the API
+  console.log(port);
   await app.listen(port || 3000);
 }
 bootstrap();

@@ -17,7 +17,7 @@ import { AuthService } from './services/auth.service';
         return {
           secret: configService.jwtSecret,
           signOptions: {
-            expiresIn: '10d',
+            expiresIn: '1d',
           },
         };
       },
