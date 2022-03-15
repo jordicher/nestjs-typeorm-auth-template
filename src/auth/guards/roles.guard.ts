@@ -1,6 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +15,7 @@ import { PayloadToken } from '../models/token.model';
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -30,5 +33,19 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Invalid role');
     }
     return isAuth;
+  }
+
+  handleRequest(err, user) {
+    if (err || !user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          error: 'This user does not have the required permissions',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    return user;
   }
 }

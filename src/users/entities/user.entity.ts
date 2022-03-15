@@ -11,6 +11,9 @@ export class User extends DefaultEntity {
   @Column({ select: false })
   password: string;
 
+  @Column({ select: false, nullable: true, name: 'refresh_token' })
+  refreshToken: string;
+
   @Column({
     name: 'first_name',
   })

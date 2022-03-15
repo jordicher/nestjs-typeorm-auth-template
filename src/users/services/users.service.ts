@@ -11,17 +11,21 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return createUserDto;
+  async create(createUserDto: CreateUserDto) {
+    const createdUser = await this.userRepository.create(createUserDto);
+    const saveUser = await this.userRepository.save(createdUser);
+    delete saveUser.password;
+    delete saveUser.refreshToken;
+    return saveUser;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return this.userRepository.find();
   }
 
   findByEmailAndGetPassword(email: string) {
     return this.userRepository.findOneOrFail({
-      select: ['id', 'password', 'email'],
+      select: ['password', 'email'],
       where: { email },
     });
   }
