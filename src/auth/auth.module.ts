@@ -16,9 +16,9 @@ import { LocalStrategy } from './strategies/local.strategy';
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
         return {
-          secret: configService.jwtSecret,
+          secret: configService.jwt.jwtSecret,
           signOptions: {
-            expiresIn: '1d',
+            expiresIn: configService.jwt.accessTokenExpiration,
           },
         };
       },

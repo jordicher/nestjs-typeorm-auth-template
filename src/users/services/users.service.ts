@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
@@ -40,5 +41,29 @@ export class UsersService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+    return await this.userRepository.update(userId, {
+      refreshToken: currentHashedRefreshToken,
+    });
+  }
+
+  async removeRefreshToken(email: string) {
+    const user = await this.findByEmailAndGetPassword(email);
+    if (!user) {
+      throw new HttpException(
+        'User with this id does not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.userRepository.update(
+      { email },
+      {
+        refreshToken: null,
+      },
+    );
   }
 }

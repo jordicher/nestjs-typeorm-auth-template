@@ -12,6 +12,11 @@ export default registerAs('config', () => {
       password: process.env.POSTGRES_PASSWORD,
       user: process.env.POSTGRES_USER,
     },
-    jwtSecret: process.env.JWT_SECRET,
+    jwt: {
+      jwtSecret: process.env.JWT_SECRET,
+      jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
+      refreshTokenExpiration: process.env.REFRESH_TOKEN_EXPIRATION,
+      accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION,
+    },
   };
 });
