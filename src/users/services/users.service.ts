@@ -26,7 +26,7 @@ export class UsersService {
 
   findByEmailAndGetPassword(email: string) {
     return this.userRepository.findOneOrFail({
-      select: ['password', 'email'],
+      select: ['password', 'email', 'role'],
       where: { email },
     });
   }
