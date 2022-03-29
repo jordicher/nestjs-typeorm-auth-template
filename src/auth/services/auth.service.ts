@@ -21,8 +21,9 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user: {
-      email: string;
       password: string;
+      id: number;
+      role: string;
     } = await this.usersService.findByEmailAndGetPassword(email);
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
@@ -35,16 +36,51 @@ export class AuthService {
     return null;
   }
 
-  login(user: User) {
-    const payload: PayloadToken = { role: user.role, email: user.email };
+  async login(user: User) {
+    const { accessToken, user: userData } = this.jwtToken(user);
+    const { cookie, refreshToken } = this.jwtRefreshToken(user);
+
+    await this.usersService.setCurrentRefreshToken(refreshToken, user.id);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken,
+      user: userData,
+      cookie,
+    };
+  }
+
+  jwtToken(user: User) {
+    const payload: PayloadToken = { role: user.role, id: user.id };
+    return {
+      accessToken: this.jwtService.sign(payload),
       user,
     };
   }
 
+  jwtRefreshToken(user: User) {
+    const payload: PayloadToken = { role: user.role, id: user.id };
+
+    console.log(
+      this.configService.get('JWT_REFRESH_SECRET'),
+      this.configService.get('REFRESH_TOKEN_EXPIRATION'),
+    );
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRATION')}`,
+    });
+
+    const cookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      'REFRESH_TOKEN_EXPIRATION',
+    )}`;
+
+    return {
+      cookie,
+      refreshToken,
+    };
+  }
+
   async logout(user: User) {
-    return await this.usersService.removeRefreshToken(user.email);
+    return await this.usersService.removeRefreshToken(user.id);
   }
 
   async createAccessTokenFromRefreshToken(refreshToken: string) {
@@ -55,9 +91,7 @@ export class AuthService {
         throw new Error();
       }
 
-      const user = await this.usersService.findByEmailAndGetPassword(
-        decoded.email,
-      );
+      const user = await this.usersService.findById(decoded.id);
 
       if (!user) {
         throw new HttpException(

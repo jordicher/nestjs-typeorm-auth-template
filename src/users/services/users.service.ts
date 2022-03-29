@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -24,15 +24,25 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findByEmailAndGetPassword(email: string) {
-    return this.userRepository.findOneOrFail({
-      select: ['password', 'email', 'role'],
+  async findByEmailAndGetPassword(email: string) {
+    return await this.userRepository.findOneOrFail({
+      select: ['id', 'password', 'role'],
       where: { email },
     });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} user`;
+  }
+
+  async findById(userId: number) {
+    return await this.userRepository.findOneOrFail(userId);
+  }
+
+  async findByEmail(email: string) {
+    return await this.userRepository.findOneOrFail({
+      where: { email },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -45,22 +55,17 @@ export class UsersService {
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
     const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-
+    console.log(currentHashedRefreshToken, userId);
     return await this.userRepository.update(userId, {
       refreshToken: currentHashedRefreshToken,
     });
   }
 
-  async removeRefreshToken(email: string) {
-    const user = await this.findByEmailAndGetPassword(email);
-    if (!user) {
-      throw new HttpException(
-        'User with this id does not exist',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+  async removeRefreshToken(userId: number) {
+    await this.findById(userId);
+
     return this.userRepository.update(
-      { email },
+      { id: userId },
       {
         refreshToken: null,
       },
