@@ -46,6 +46,7 @@ export class AuthService {
       accessToken,
       user: userData,
       cookie,
+      refreshToken,
     };
   }
 
@@ -60,10 +61,6 @@ export class AuthService {
   jwtRefreshToken(user: User) {
     const payload: PayloadToken = { role: user.role, id: user.id };
 
-    console.log(
-      this.configService.get('JWT_REFRESH_SECRET'),
-      this.configService.get('REFRESH_TOKEN_EXPIRATION'),
-    );
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRATION')}`,
