@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -36,21 +31,20 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
+  async login(user: PayloadToken) {
     const { accessToken, user: userData } = this.jwtToken(user);
-    const { cookie, refreshToken } = this.jwtRefreshToken(user);
+    const refreshToken = this.jwtRefreshToken(user);
 
     await this.usersService.setCurrentRefreshToken(refreshToken, user.id);
 
     return {
       accessToken,
       user: userData,
-      cookie,
       refreshToken,
     };
   }
 
-  jwtToken(user: User) {
+  jwtToken(user: PayloadToken) {
     const payload: PayloadToken = { role: user.role, id: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
@@ -58,54 +52,26 @@ export class AuthService {
     };
   }
 
-  jwtRefreshToken(user: User) {
-    const payload: PayloadToken = { role: user.role, id: user.id };
+  jwtRefreshToken(user: PayloadToken) {
+    const payload = { role: user.role, id: user.id };
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRATION')}`,
     });
 
-    const cookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'REFRESH_TOKEN_EXPIRATION',
-    )}`;
-
-    return {
-      cookie,
-      refreshToken,
-    };
+    return refreshToken;
   }
 
   async logout(user: User) {
     return await this.usersService.removeRefreshToken(user.id);
   }
 
-  async createAccessTokenFromRefreshToken(refreshToken: string) {
+  async createAccessTokenFromRefreshToken(
+    refreshToken: string,
+    user: PayloadToken,
+  ) {
     try {
-      const decoded = this.jwtService.decode(refreshToken) as PayloadToken;
-
-      if (!decoded) {
-        throw new Error();
-      }
-
-      const user = await this.usersService.findById(decoded.id);
-
-      if (!user) {
-        throw new HttpException(
-          'User with this id does not exist',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      const isRefreshTokenMatching = await bcrypt.compare(
-        refreshToken,
-        user.refreshToken,
-      );
-
-      if (!isRefreshTokenMatching) {
-        throw new UnauthorizedException('Invalid token');
-      }
-
       await this.jwtService.verifyAsync(refreshToken, this.getTokenOptions());
       return this.login(user);
     } catch {

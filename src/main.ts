@@ -2,7 +2,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -15,7 +14,6 @@ async function bootstrap() {
   if (enableCors) {
     app.enableCors();
   }
-  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -32,12 +30,14 @@ async function bootstrap() {
     .setTitle('API')
     .setDescription('API description')
     .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
-    .addCookieAuth('authCookie', {
-      type: 'http',
-      in: 'cookie',
-      scheme: 'bearer',
-    })
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'refresh-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

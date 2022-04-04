@@ -73,7 +73,7 @@ export class UsersService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.userRepository.findOne({
-      select: ['id', 'refreshToken'],
+      select: ['id', 'refreshToken', 'role'],
       where: { id: userId },
     });
 
@@ -83,7 +83,7 @@ export class UsersService {
     );
 
     if (isRefreshTokenMatching) {
-      return user;
+      return { id: user.id, role: user.role };
     }
   }
 }

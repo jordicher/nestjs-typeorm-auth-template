@@ -29,28 +29,28 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @ApiBearerAuth() // in the swagger documentation, a bearer token is required to access this endpoint
+  @ApiBearerAuth('access-token') // in the swagger documentation, a bearer token is required to access this endpoint
   @Roles(Role.ADMIN) // makes the endpoint accessible only by the admin
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
