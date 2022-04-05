@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { createHash } from 'crypto';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
@@ -54,7 +55,9 @@ export class UsersService {
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
-    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hash = createHash('sha256').update(refreshToken).digest('hex'); //crypto is a node module, and bcrypt the maximum length of the hash is 60 characters, and token is longer than that, so we need to hash it
+
+    const currentHashedRefreshToken = await bcrypt.hashSync(hash, 10);
     return await this.userRepository.update(userId, {
       refreshToken: currentHashedRefreshToken,
     });
@@ -77,8 +80,9 @@ export class UsersService {
       where: { id: userId },
     });
 
+    const hash = createHash('sha256').update(refreshToken).digest('hex');
     const isRefreshTokenMatching = await bcrypt.compare(
-      refreshToken,
+      hash,
       user.refreshToken,
     );
 

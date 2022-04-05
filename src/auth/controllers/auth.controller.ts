@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity';
 import { LoginDto } from '../dto/login.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import JwtRefreshGuard from '../guards/jwt-refresh.guard';
@@ -29,7 +28,7 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('logout')
-  async logOut(@Request() req: { user: User }) {
+  async logOut(@Request() req: { user: PayloadToken }) {
     await this.authService.logout(req.user);
   }
 
@@ -37,13 +36,6 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   refresh(@Req() req: AuthorizedRequest) {
-    //get bearear of request
-    console.log(req.user);
-    const refreshToken = req.headers.authorization.split(' ')[1];
-
-    return this.authService.createAccessTokenFromRefreshToken(
-      refreshToken,
-      req.user,
-    );
+    return this.authService.createAccessTokenFromRefreshToken(req.user);
   }
 }

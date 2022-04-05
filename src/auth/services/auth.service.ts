@@ -1,8 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/services/users.service';
 import { PayloadToken } from './../models/token.model';
 
@@ -22,6 +21,7 @@ export class AuthService {
     } = await this.usersService.findByEmailAndGetPassword(email);
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
+
       if (isMatch) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...rta } = user;
@@ -32,14 +32,13 @@ export class AuthService {
   }
 
   async login(user: PayloadToken) {
-    const { accessToken, user: userData } = this.jwtToken(user);
+    const { accessToken } = this.jwtToken(user);
     const refreshToken = this.jwtRefreshToken(user);
-
     await this.usersService.setCurrentRefreshToken(refreshToken, user.id);
 
     return {
       accessToken,
-      user: userData,
+      user,
       refreshToken,
     };
   }
@@ -48,7 +47,6 @@ export class AuthService {
     const payload: PayloadToken = { role: user.role, id: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
-      user,
     };
   }
 
@@ -63,33 +61,11 @@ export class AuthService {
     return refreshToken;
   }
 
-  async logout(user: User) {
+  async logout(user: PayloadToken) {
     return await this.usersService.removeRefreshToken(user.id);
   }
 
-  async createAccessTokenFromRefreshToken(
-    refreshToken: string,
-    user: PayloadToken,
-  ) {
-    try {
-      await this.jwtService.verifyAsync(refreshToken, this.getTokenOptions());
-      return this.login(user);
-    } catch {
-      throw new UnauthorizedException('Invalid token');
-    }
-  }
-
-  private getTokenOptions() {
-    const options: JwtSignOptions = {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-    };
-
-    const expiration: string = this.configService.get(
-      'REFRESH_TOKEN_EXPIRATION',
-    );
-    if (expiration) {
-      options.expiresIn = expiration;
-    }
-    return options;
+  async createAccessTokenFromRefreshToken(user: PayloadToken) {
+    return this.jwtToken(user);
   }
 }
