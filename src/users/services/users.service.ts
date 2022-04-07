@@ -32,8 +32,8 @@ export class UsersService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    return await this.userRepository.findOne(id);
   }
 
   async findById(userId: number) {
@@ -46,16 +46,17 @@ export class UsersService {
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return { id, updateUserDto };
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    return await this.userRepository.update(id, updateUserDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    return await this.userRepository.delete(id);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
-    const hash = createHash('sha256').update(refreshToken).digest('hex'); //crypto is a node module, and bcrypt the maximum length of the hash is 60 characters, and token is longer than that, so we need to hash it
+    //crypto is a node module, and bcrypt the maximum length of the hash is 60 characters, and token is longer than that, so we need to hash it
+    const hash = createHash('sha256').update(refreshToken).digest('hex');
 
     const currentHashedRefreshToken = await bcrypt.hashSync(hash, 10);
     return await this.userRepository.update(userId, {
