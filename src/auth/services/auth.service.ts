@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import config from '../../config';
 import { UsersService } from '../../users/services/users.service';
 import { PayloadToken } from './../models/token.model';
 
@@ -10,7 +11,8 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    @Inject(config.KEY)
+    private configService: ConfigType<typeof config>,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -54,8 +56,8 @@ export class AuthService {
     const payload = { role: user.role, id: user.id };
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: `${this.configService.get('REFRESH_TOKEN_EXPIRATION')}`,
+      secret: this.configService.jwt.jwtRefreshSecret,
+      expiresIn: `${this.configService.jwt.refreshTokenExpiration}`,
     });
 
     return refreshToken;
