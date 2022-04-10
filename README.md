@@ -81,6 +81,8 @@ $ npm run test:e2e
 This template uses swagger for documentation.
 To see swagger, if you are using port 8080 for the api, it would be for example => localhost:8080/docs
 
+![imagen](https://user-images.githubusercontent.com/56872592/162640131-e28b39fc-a778-4718-b5aa-93fa62ec1daf.png)
+
 ## Endpoint security
 
 This template uses jwt tokens and refresh tokens.
