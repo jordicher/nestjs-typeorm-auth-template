@@ -1,6 +1,10 @@
 import { Controller, Get, Post, Req, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { LoginDto } from '../dto/login.dto';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  GetRefreshResponse,
+  LoginDto,
+  PostLoginResponse,
+} from '../dto/login.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import JwtRefreshGuard from '../guards/jwt-refresh.guard';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
@@ -18,6 +22,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiBody({ type: LoginDto })
+  @ApiResponse({ type: PostLoginResponse, status: 201 })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req: { user: PayloadToken }) {
@@ -25,6 +30,7 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @ApiResponse({ status: 200 })
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('logout')
@@ -32,6 +38,7 @@ export class AuthController {
     await this.authService.logout(req.user);
   }
 
+  @ApiResponse({ status: 200, type: GetRefreshResponse })
   @ApiBearerAuth('refresh-token')
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')

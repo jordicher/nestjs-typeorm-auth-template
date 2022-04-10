@@ -12,3 +12,16 @@ export class LoginDto {
   @IsNotEmpty()
   readonly password: string;
 }
+
+export class PostLoginResponse {
+  @ApiProperty()
+  readonly accessToken: string;
+
+  @ApiProperty()
+  readonly refreshToken: string;
+}
+
+export class GetRefreshResponse {
+  @ApiProperty()
+  readonly accessToken: string;
+}
