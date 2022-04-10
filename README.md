@@ -58,9 +58,6 @@ $ npm run infra:up
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
 # watch mode
 $ npm run start:dev
 
@@ -74,6 +71,28 @@ $ npm run start:prod
 # e2e tests
 $ npm run test:e2e
 
+```
+
+### Migrations.
+
+To create a migration and implement changes in the db.
+
+//**run old migrations, this project by default has a user migration**
+
+```
+$ npm run migration:run
+```
+
+//generate a migration
+
+```
+$ npm run migration:generate name_new_migration
+```
+
+//run the migration
+
+```
+$ npm run migration:run
 ```
 
 ## Documentation
