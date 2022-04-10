@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/auth/models/roles.model';
 import { BeforeInsert, Column, Entity } from 'typeorm';
+import { Role } from '../../auth/models/roles.model';
 import { DefaultEntity } from '../../utils/entities/default.entity';
 
 @Entity('users')
