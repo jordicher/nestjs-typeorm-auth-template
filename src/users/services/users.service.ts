@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash } from 'crypto';
@@ -18,6 +22,14 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto | CreateAdminDto) {
+    const user = await this.userRepository.findOne({
+      email: createUserDto.email,
+    });
+
+    if (user) {
+      throw new BadRequestException();
+    }
+
     const createdUser = await this.userRepository.create(createUserDto);
     const saveUser = await this.userRepository.save(createdUser);
     delete saveUser.password;
@@ -51,11 +63,24 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return await this.userRepository.update(id, updateUserDto);
+    const user = await this.userRepository.preload({
+      id,
+      ...updateUserDto,
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} does not exist`);
+    }
+    return this.userRepository.save(user);
   }
 
   async remove(id: number) {
-    return await this.userRepository.delete(id);
+    const user = await this.userRepository.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} does not exist`);
+    }
+
+    return this.userRepository.remove(user);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {

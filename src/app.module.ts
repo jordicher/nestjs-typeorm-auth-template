@@ -33,8 +33,8 @@ import { UsersModule } from './users/users.module';
           database: configService.postgres.name,
           username: configService.postgres.user,
           password: configService.postgres.password,
-          synchronize: false,
           autoLoadEntities: true,
+          keepConnectionAlive: true,
         };
       },
     }),

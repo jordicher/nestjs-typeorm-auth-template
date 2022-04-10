@@ -26,7 +26,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "pretest:e2e": "docker-compose up -d postgresTest",
+    "posttest:e2e": "docker-compose stop postgresTest && docker-compose rm -f postgresTest",
     "prepare": "husky install",
     "reinstall": "docker-compose stop postgres && docker-compose rm -f postgres && npm run infra:up && npm run migration:run && npm run seed:run "
   },

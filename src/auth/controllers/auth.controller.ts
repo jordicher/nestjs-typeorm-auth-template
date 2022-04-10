@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Req, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   GetRefreshResponse,
@@ -22,8 +30,9 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ type: PostLoginResponse, status: 201 })
+  @ApiResponse({ type: PostLoginResponse, status: 200 })
   @UseGuards(LocalAuthGuard)
+  @HttpCode(200)
   @Post('login')
   login(@Request() req: { user: PayloadToken }) {
     const user = req.user;
